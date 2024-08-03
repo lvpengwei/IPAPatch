@@ -275,7 +275,7 @@ rsync -av --exclude=".*" "${RESOURCES_TO_INJECT_PATH}/" "$TARGET_APP_CONTENTS_PA
 # 6. Remove Plugins/Watch (AppExtensions), To Simplify the Signing Process
 
 echo "Removing AppExtensions"
-rm -rf "$TARGET_APP_CONTENTS_PATH/PlugIns" || true
+# rm -rf "$TARGET_APP_CONTENTS_PATH/PlugIns" || true
 rm -rf "$TARGET_APP_CONTENTS_PATH/Watch" || true
 
 if [ "$REMOVE_WATCHPLACEHOLDER" = true ]; then
@@ -313,6 +313,25 @@ else
     /usr/bin/codesign --force --sign "$EXPANDED_CODE_SIGN_IDENTITY" "$TARGET_APP_CONTENTS_PATH/Dylibs/"*
 fi
 
+echo "Code Signing Plugins"
+function signDylibsInPlusings() {
+    for file in `ls $1`;
+    do
+        if [[ -d "$1/$file" ]]; then
+            signDylibsInPlusings "$1/$file"
+        else
+            dylibName=`echo $file | grep '.dylib'`
+            if [[ $dylibName != '' ]]; then
+                if [ "$USE_ORIGINAL_ENTITLEMENTS" = true ]; then
+                    /usr/bin/codesign --force --sign "$EXPANDED_CODE_SIGN_IDENTITY" --entitlements "$ENTITLEMENTS" $1/$file
+                else
+                    /usr/bin/codesign --force --sign "$EXPANDED_CODE_SIGN_IDENTITY" $1/$file
+                fi
+            fi
+        fi
+    done
+}
+signDylibsInPlusings "$TARGET_APP_CONTENTS_PATH/Plugins/"
 
 echo "Code Signing Frameworks"
 if [ -d "$TARGET_APP_FRAMEWORKS_PATH" ]; then
