@@ -275,7 +275,10 @@ rsync -av --exclude=".*" "${RESOURCES_TO_INJECT_PATH}/" "$TARGET_APP_CONTENTS_PA
 # 6. Remove Plugins/Watch (AppExtensions), To Simplify the Signing Process
 
 echo "Removing AppExtensions"
-# rm -rf "$TARGET_APP_CONTENTS_PATH/PlugIns" || true
+if [ $PLATFORM != "Mac" ]; then
+    rm -rf "$TARGET_APP_CONTENTS_PATH/PlugIns" || true
+fi
+
 rm -rf "$TARGET_APP_CONTENTS_PATH/Watch" || true
 
 if [ "$REMOVE_WATCHPLACEHOLDER" = true ]; then
@@ -331,7 +334,9 @@ function signDylibsInPlusings() {
         fi
     done
 }
-signDylibsInPlusings "$TARGET_APP_CONTENTS_PATH/Plugins/"
+if [ $PLATFORM = "Mac" ]; then
+    signDylibsInPlusings "$TARGET_APP_CONTENTS_PATH/Plugins/"
+fi
 
 echo "Code Signing Frameworks"
 if [ -d "$TARGET_APP_FRAMEWORKS_PATH" ]; then
