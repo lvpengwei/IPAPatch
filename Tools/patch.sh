@@ -35,6 +35,7 @@ TARGET_MAC_APP_PATH="${ASSETS_PATH}/macapp.app"
 FRAMEWORKS_TO_INJECT_PATH="${ASSETS_PATH}/Frameworks"
 RESOURCES_TO_INJECT_PATH="${ASSETS_PATH}/Resources"
 DYLIBS_TO_INJECT_PATH="${ASSETS_PATH}/Dylibs"
+MOBILE_PROVISION_PATH="${ASSETS_PATH}/embedded.mobileprovision"
 
 DUMMY_DISPLAY_NAME="" # To be found in Step 0
 TARGET_BUNDLE_ID="" # To be found in Step 0
@@ -286,6 +287,14 @@ if [ "$REMOVE_WATCHPLACEHOLDER" = true ]; then
     rm -rf "$TARGET_APP_CONTENTS_PATH/com.apple.WatchPlaceholder" || true
 fi
 
+if [ $PLATFORM == "iOS" ]; then
+    rm -rf "$TARGET_APP_CONTENTS_PATH/Extensions" || true
+
+    echo "Replacing embedded.mobileprovision"
+    #cp "$HOME/Library/MobileDevice/Provisioning Profiles/$EXPANDED_PROVISIONING_PROFILE.mobileprovision" "$TARGET_APP_CONTENTS_PATH/embedded.mobileprovision"
+    rm -rf "$TARGET_APP_CONTENTS_PATH/embedded.mobileprovision" || true
+    cp "$MOBILE_PROVISION_PATH" "$TARGET_APP_CONTENTS_PATH/"
+fi
 
 # ---------------------------------------------------
 # 7. Update Info.plist for Target App
